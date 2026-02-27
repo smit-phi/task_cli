@@ -43,6 +43,9 @@ class JSONFileStorage(GenericStorage):
              for idx,obj in enumerate(obj_list):
                  if obj["id"] == id:
                      obj_list[idx] = {**obj,**update} 
+                     res = {"obj_list":obj_list}
+                     f.seek(0)
+                     json.dump(res,f)
                      return True 
              return False 
         
