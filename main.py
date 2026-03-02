@@ -70,6 +70,8 @@ def main():
             if len(cli_args)==3:
                 update_id = cli_args[1]
                 updated_status = cli_args[2]
+                if updated_status not in ["todo","in-progress","done"]:
+                    return "Invalid status for task"
                 update = {
                     "status":updated_status,
                     "updatedAt":datetime.now().strftime("%Y-%m-%d %H:%M:%S")
