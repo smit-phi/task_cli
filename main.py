@@ -1,4 +1,13 @@
 import sys 
+from datetime import datetime
+from task import Task
+from storage import JSONFileStorage
+
+def format_list(lst):
+    str = ""
+    for id,des in lst:
+        str += f"{id} | {des}\n"
+    return str
 
 def main():
     if len(sys.argv)==1:
@@ -14,23 +23,66 @@ def main():
         """
     cli_args = sys.argv[1:]
     cmd = cli_args[0]
+    storage = JSONFileStorage()
     match cmd:
         case "add":
-            # create Task object here , store it using storage object 
-            pass 
+            if len(cli_args)==2:
+                description = cli_args[1]
+                task_obj = Task(description=description)
+                storage.add(task_obj)
+                return f"Task Added Successfully {task_obj.id}"
+            else:
+                return "Invalid Format : use task-cli add <description>"
         case "delete":
-            # find task object in storage object and delete it 
-            pass 
+           
+            if len(cli_args)==2:
+                del_id = cli_args[1]
+                if storage.delete(del_id):
+                    return f"Task with ID {del_id} is deleted successfully"
+                return f"No Task found with ID {del_id}"
+            else:
+                return "Invalid Format : use task-cli delete <ID>"
         case "update":
-            # update task object with given
-            pass 
+            if len(cli_args)==3:
+                update_id = cli_args[1]
+                description = cli_args[2]
+                update = {
+                    "description": description,
+                    "updateAt" : datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+                if storage.update(update_id,update):
+                    return f"Task with ID {update_id} is updated successfully"
+                return f"No Task found with ID {update_id}"
+            else:
+                return "Invalid Format : use task-cli update <ID> <description>"
         case "list":
-            #list all objects from storage 
-            pass 
+            if len(cli_args)==1:
+                return format_list(list(map(lambda x : (x.id,x.description),storage.list())))
+            elif len(cli_args)==2:
+                status = cli_args[1]
+                if status not in ["todo","in-progress","done"]:
+                    return "Invalid status to filter tasks"
+                return format_list(list(map(lambda x : (x.id,x.description),storage.list(status=status))))
+            else:
+                return "Invalid Format : use task-cli list <status>"
+
+             
         case "mark":
-            #mark task in storage 
-            pass 
+            if len(cli_args)==3:
+                update_id = cli_args[1]
+                updated_status = cli_args[2]
+                update = {
+                    "status":updated_status,
+                    "updatedAt":datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+                if storage.update(update_id,update):
+                    return f"Task with ID {update_id}, status changed to {updated_status}"
+                return f"No Task found with ID {update_id}"
+            else:
+                return "Invalid Format : use task-cli mark <ID> <status>"
+             
         case _:
             return """ Error : Invalid command """
+        
 if __name__ == "__main__":
     print(main())
